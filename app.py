@@ -6,7 +6,11 @@ from conversacion import responder_charla, es_despedida
 from deep_translator import GoogleTranslator
 
 # Configuracion de la pagina
-st.set_page_config(page_title="Asistente de tamizaje de ansiedad", page_icon="🧠")
+st.set_page_config(
+    page_title="Asistente de Tamizaje de Ansiedad Académica",
+    page_icon="https://api.dicebear.com/9.x/icons/svg?icon=robot&backgroundColor=7C6BF0&iconColor=ffffff",
+    layout="centered",
+)
 
 
 # Carga del modelo y el vectorizador
