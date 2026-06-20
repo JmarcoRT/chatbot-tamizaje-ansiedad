@@ -3,7 +3,7 @@ import joblib
 from gad7 import PREGUNTAS_GAD7, OPCIONES, interpretar_puntaje
 from respuestas import mensaje_nivel_bajo, mensaje_nivel_alto
 from conversacion import responder_charla, es_despedida
-from deep_translator import GoogleTranslator
+from sentence_transformers import SentenceTransformer
 
 # Configuracion de la pagina
 st.set_page_config(
@@ -13,30 +13,20 @@ st.set_page_config(
 )
 
 
-# Carga del modelo y el vectorizador
+# Carga del modelo
 @st.cache_resource
 def cargar_modelo():
     modelo = joblib.load("modelo_ansiedad.pkl")
-    vectorizador = joblib.load("vectorizador_tfidf.pkl")
-    return modelo, vectorizador
+    embedder = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    return modelo, embedder
+
+modelo, embedder = cargar_modelo()
 
 
-modelo, vectorizador = cargar_modelo()
-
-
-# Traduce el texto del usuario
-def traducir_a_ingles(texto):
-    try:
-        return GoogleTranslator(source="auto", target="en").translate(texto)
-    except Exception:
-        # Si falla la traduccion (sin internet, etc.), usa el texto original
-        return texto
-
-
-# Prediccion del modelo: traduce a ingles y luego clasifica
+# Predicción del modelo: encodea el texto en español y clasifica
 def detecta_ansiedad(texto):
-    texto_en = traducir_a_ingles(texto)
-    pred = int(modelo.predict(vectorizador.transform([texto_en.lower().strip()]))[0])
+    emb = embedder.encode([texto.strip()], normalize_embeddings=True)
+    pred = int(modelo.predict(emb)[0])
     return pred
 
 
